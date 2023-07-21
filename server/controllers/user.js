@@ -4,7 +4,7 @@ const {
 	generateAccessToken,
 	generateRefreshToken,
 } = require('../middlewares/jwt.js');
-
+const jwt = require('jsonwebtoken');
 const register = asynHandler(async (req, res) => {
 	const { email, password, firstname, lastname } = req.body;
 	if (!email || !password || !lastname || !firstname)
@@ -67,8 +67,49 @@ const getCurrent = asynHandler(async (req, res) => {
 		rs: user ? user : 'User not found',
 	});
 });
+const refreshAccessToken = asynHandler(async (req, res) => {
+	// Lay token tu cookie
+	const cookie = req.cookies;
+	// Check xem co token hay khong
+	if (!cookie && !cookie.refreshToken)
+		throw new Error('No refresh token in cookie');
+	// Check token co hop le hay khong
+	const rs = await jwt.verify(cookie.refreshToken, process.env.JWT_SECRET);
+	const response = await User.findOneAndDelete({
+		_id: rs._id,
+		refreshToken: cookie.refreshToken,
+	});
+	return res.status(200).json({
+		success: response ? true : false,
+		newAccessToken: response
+			? generateAccessToken(response._id, response.role)
+			: 'Refresh token not matched',
+	});
+});
+const logout = asynHandler(async (req, res) => {
+	const cookie = req.cookies;
+	if (!cookie || !cookie.refreshToken)
+		throw new Error('No refresh token in cookie');
+	// Xoa refresh token trong db
+	await User.findOneAndUpdate(
+		{ refreshToken: cookie.refreshToken },
+		{ refreshToken: '' },
+		{ new: true },
+	);
+	// Xoa refresh token trong cookie
+	res.clearCookie('refreshToken', {
+		httpOnly: true,
+		secure: true,
+	});
+	return res.status(200).json({
+		success: true,
+		mes: 'Logout successfully',
+	});
+});
 module.exports = {
 	register,
 	login,
 	getCurrent,
+	refreshAccessToken,
+	logout,
 };
