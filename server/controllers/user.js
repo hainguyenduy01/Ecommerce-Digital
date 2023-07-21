@@ -5,6 +5,9 @@ const {
 	generateRefreshToken,
 } = require('../middlewares/jwt.js');
 const jwt = require('jsonwebtoken');
+const sendMailer = require('../utils/sendMailer');
+const crypto = require('crypto');
+
 const register = asynHandler(async (req, res) => {
 	const { email, password, firstname, lastname } = req.body;
 	if (!email || !password || !lastname || !firstname)
@@ -75,7 +78,7 @@ const refreshAccessToken = asynHandler(async (req, res) => {
 		throw new Error('No refresh token in cookie');
 	// Check token co hop le hay khong
 	const rs = await jwt.verify(cookie.refreshToken, process.env.JWT_SECRET);
-	const response = await User.findOneAndDelete({
+	const response = await User.findOne({
 		_id: rs._id,
 		refreshToken: cookie.refreshToken,
 	});
@@ -106,10 +109,61 @@ const logout = asynHandler(async (req, res) => {
 		mes: 'Logout successfully',
 	});
 });
+/* 
+Client gui email
+Server check email co hop le hay khong=>Gui mail+kem theo link (password change token)
+Client check mail=>Click link
+Client gui api kem token
+Check token co giong voi token ma server gui mail hay khong 
+Change password
+*/
+
+const forgotPassword = asynHandler(async (req, res) => {
+	const { email } = req.query;
+	if (!email) throw new Error('Missing email');
+	const user = await User.findOne({ email });
+	if (!user) throw new Error('User not found');
+	const resetToken = user.createPasswordChangedToken();
+	await user.save();
+	const html = `Xin vui lòng click vào link dưới đây để thay đổi mật khẩu của bạn.Link này sẽ hết hạn sau 15 phút kể từ bây giờ. <a href=${process.env.URL_SERVER}/api/user/reset-password/${resetToken}>Click here</a>`;
+	const data = {
+		email,
+		html,
+	};
+	const rs = await sendMailer(data);
+	return res.status(200).json({
+		success: true,
+		rs,
+	});
+});
+const resetPassword = asynHandler(async (req, res) => {
+	const { password, token } = req.body;
+	if (!password || !token) throw new Error('Missing inputs');
+	const passwordResetToken = crypto
+		.createHash('sha256')
+		.update(token)
+		.digest('hex');
+	const user = await User.findOne({
+		passwordResetToken,
+		passwordResetExpire: { $gt: Date.now() },
+	});
+	if (!user) throw new Error('Invalid reset token');
+	user.password = password;
+	user.passwordResetToken = undefined;
+	user.passwordChangedAt = Date.now();
+	user.passwordResetExpire = undefined;
+	await user.save();
+	return res.status(200).json({
+		success: user ? true : false,
+		mes: user ? 'Reset password successfully' : 'Something went wrong',
+	});
+});
 module.exports = {
 	register,
 	login,
 	getCurrent,
 	refreshAccessToken,
 	logout,
+	forgotPassword,
+	resetPassword,
 };
