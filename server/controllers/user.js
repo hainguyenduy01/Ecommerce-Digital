@@ -1,6 +1,9 @@
 const User = require('../models/user');
 const asynHandler = require('express-async-handler');
-const { generateAccessToken } = require('../middlewares/jwt.js');
+const {
+	generateAccessToken,
+	generateRefreshToken,
+} = require('../middlewares/jwt.js');
 
 const register = asynHandler(async (req, res) => {
 	const { email, password, firstname, lastname } = req.body;
@@ -37,7 +40,7 @@ const login = asynHandler(async (req, res) => {
 		// Tao access token
 		const accessToken = generateAccessToken(response._id, role);
 		// Tao refresh token
-		const refreshToken = generateAccessToken(response._id);
+		const refreshToken = generateRefreshToken(response._id);
 		// Luu refresh token vao database
 		await User.findByIdAndUpdate(response._id, { refreshToken }, { new: true });
 		// Luu refresh token vao cookie
@@ -58,7 +61,7 @@ const login = asynHandler(async (req, res) => {
 const getCurrent = asynHandler(async (req, res) => {
 	const { _id } = req.user;
 
-	const user = await User.findById(_id).select('-refreshToken -role');
+	const user = await User.findById(_id).select('-refreshToken -password -role');
 	return res.status(200).json({
 		success: false,
 		rs: user ? user : 'User not found',
