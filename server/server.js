@@ -4,15 +4,12 @@ const dbConnect = require('./config/dbconnect');
 const initRoutes = require('./routes');
 const cookieParser = require('cookie-parser');
 const app = express();
-app.use(cookieParser());
 const port = process.env.PORT || 8888;
+app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 dbConnect();
 initRoutes(app);
-app.use('/', (req, res) => {
-	res.send('Server onnnn');
-});
 app.listen(port, () => {
 	console.log('Sever running on the port: ' + port);
 });
