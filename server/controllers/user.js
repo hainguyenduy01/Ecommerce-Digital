@@ -129,7 +129,55 @@ const forgotPassword = asynHandler(async (req, res) => {
 	if (!user) throw new Error('User not found');
 	const resetToken = user.createPasswordChangedToken();
 	await user.save();
-	const html = `Xin vui lòng click vào link dưới đây để thay đổi mật khẩu của bạn.Link này sẽ hết hạn sau 15 phút kể từ bây giờ. <a href=${process.env.URL_SERVER}/api/user/reset-password/${resetToken}>Click here</a>`;
+	const html = `<div
+	style="
+		width: 70%;
+		margin: 30px auto;
+		font-family: Arial, sans-serif;
+		line-height: 1.6;
+	"
+>
+	<div style="background-color: #4184f3; padding: 50px">
+		<h1 style="color: #fff">Đặt lại mật khẩu</h1>
+	</div>
+	<div
+		style="
+			background-color: #fafafa;
+			padding: 10px 30px;
+			border: 1px solid #ccc;
+		"
+	>
+		<p>Xin chào bạn !</p>
+		<p>
+			Xin vui lòng bấm vào đường dẫn dưới đây để thay đổi mật khẩu của bạn.
+			Link này sẽ hết hạn sau 15 phút kể từ bây giờ.
+		</p>
+		<p style="margin-top: 20px">
+			<a
+				href="${process.env.URL_SERVER}/api/user/reset-password/${resetToken}"
+				style="
+					display: inline-block;
+					background-color: #007bff;
+					color: #fff;
+					text-decoration: none;
+					padding: 10px 20px;
+					border-radius: 5px;
+				"
+				>Bấm vào đây</a
+			>
+		</p>
+		<p style="margin-top: 20px">
+			Nếu bạn không yêu cầu mã này thì có thể là ai đó đang tìm cách truy
+			cập vào Tài khoản HaiTech ${email}.
+			<b>Không chuyển tiếp hoặc cung cấp đường dẫn này cho bất kỳ ai.</b>
+		</p>
+		<p style="margin-top: 20px">
+			Nếu bạn không yêu cầu thay đổi mật khẩu, hãy bỏ qua email này.
+		</p>
+		<p>Trân trọng,</p>
+		<p>HaiTech</p>
+	</div>
+</div>`;
 	const data = {
 		email,
 		html,
