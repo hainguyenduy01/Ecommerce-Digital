@@ -51,7 +51,7 @@ const login = asynHandler(async (req, res) => {
 			{ new: true },
 		);
 		// Luu refresh token vao cookie
-		res.cookie('refreshToken', refreshToken, {
+		res.cookie('refreshToken', newRefreshToken, {
 			httpOnly: true,
 			maxAge: 7 * 24 * 60 * 60 * 1000,
 		});
