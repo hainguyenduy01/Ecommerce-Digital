@@ -21,11 +21,48 @@ const getProduct = asyncHandler(async (req, res) => {
 });
 // Filtering,sorting & pagination
 const getProducts = asyncHandler(async (req, res) => {
-	const products = await Product.find();
-	return res.status(200).json({
-		success: products ? true : false,
-		productData: products ? products : 'Cannot get products',
-	});
+	const queries = { ...req.query };
+	// Tách các trường đặc biệt ra khỏi query
+	const excludeFields = ['limit', 'sort', 'page', 'fields'];
+	excludeFields.forEach((el) => delete queries[el]);
+
+	// Format lại các operators cho đúng cú pháp mongoose
+	let queryString = JSON.stringify(queries);
+	queryString = queryString.replace(
+		/\b(gt|gte|lt|lte)\b/g,
+		(matchedEl) => `$${matchedEl}`,
+	);
+	const formatedQueries = JSON.parse(queryString);
+
+	// Filtering
+	if (queries?.title)
+		formatedQueries.title = { $regex: queries.title, $options: 'i' };
+	let queryCommand = Product.find(formatedQueries);
+
+	// Sorting
+	if (req.query.sort) {
+		const sortBy = req.query.sort.split(',').join(' ');
+		queryCommand = queryCommand.sort(sortBy);
+	}
+
+	// Fields limiting
+	// Pagination
+
+	// Execute query
+	// Số lượng sp thoả mãn điều kiện !== số lượng sp trả về 1 lần gọi API
+	queryCommand
+		.then(async (response) => {
+			// if (err) throw new Error(err.message);
+			const counts = await Product.find(formatedQueries).countDocuments();
+			return res.status(200).json({
+				success: response ? true : false,
+				products: response ? response : 'Cannot get products',
+				counts,
+			});
+		})
+		.catch((err) => {
+			throw new Error(err.message);
+		});
 });
 const updateProduct = asyncHandler(async (req, res) => {
 	const { pid } = req.params;
