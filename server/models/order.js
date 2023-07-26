@@ -4,7 +4,7 @@ const mongoose = require('mongoose'); // Erase if already required
 var orderSchema = new mongoose.Schema({
 	products: [
 		{
-			product: { type: mongoose.Types.ObjectID, ref: 'Product' },
+			product: { type: mongoose.Types.ObjectId, ref: 'Product' },
 			count: Number,
 			color: String,
 		},
@@ -16,7 +16,7 @@ var orderSchema = new mongoose.Schema({
 	},
 	paymentIntent: {},
 	orderBy: {
-		type: mongoose.Types.ObjectID,
+		type: mongoose.Types.ObjectId,
 		ref: 'User',
 	},
 });

@@ -266,6 +266,48 @@ const updateUserAddress = asynHandler(async (req, res) => {
 		updatedUser: response ? response : 'Something went wrong',
 	});
 });
+const updateCart = asynHandler(async (req, res) => {
+	const { _id } = req.user;
+	const { pid, quantily, color } = req.body;
+	if (!pid || !quantily || !color) throw new Error('Missing inputs');
+	const user = await User.findById(_id).select('cart');
+	const alreadyProduct = user?.cart?.find(
+		(el) => el.product.toString() === pid,
+	);
+	if (alreadyProduct) {
+		if (alreadyProduct.color === color) {
+			const response = await User.updateOne(
+				{ cart: { $elemMatch: alreadyProduct } },
+				{ $set: { 'cart.$.quantily': quantily } },
+				{ new: true },
+			);
+			return res.status(200).json({
+				success: response ? true : false,
+				updatedUser: response ? response : 'Something went wrong',
+			});
+		} else {
+			const response = await User.findByIdAndUpdate(
+				_id,
+				{ $push: { cart: { product: pid, quantily, color } } },
+				{ new: true },
+			);
+			return res.status(200).json({
+				success: response ? true : false,
+				updatedUser: response ? response : 'Something went wrong',
+			});
+		}
+	} else {
+		const response = await User.findByIdAndUpdate(
+			_id,
+			{ $push: { cart: { product: pid, quantily, color } } },
+			{ new: true },
+		);
+		return res.status(200).json({
+			success: response ? true : false,
+			updatedUser: response ? response : 'Something went wrong',
+		});
+	}
+});
 module.exports = {
 	register,
 	login,
@@ -279,4 +321,5 @@ module.exports = {
 	updateUser,
 	updateUserByAdmin,
 	updateUserAddress,
+	updateCart,
 };
