@@ -95,10 +95,44 @@ const deleteProduct = asyncHandler(async (req, res) => {
 		deletedProduct: deletedProduct ? deletedProduct : 'Cannot delete product',
 	});
 });
+const ratings = asyncHandler(async (req, res) => {
+	const { _id } = req.user;
+	const { star, comment, pid } = req.body;
+	if (!star || !pid) throw new Error('Missing inputs');
+	const ratingProduct = await Product.findById(pid);
+	const alreadyRating = ratingProduct?.ratings?.find(
+		(el) => el.postedBy.toString() === _id,
+	);
+	if (alreadyRating) {
+		// update star & comment
+		await Product.updateOne(
+			{
+				ratings: { $elemMatch: alreadyRating },
+			},
+			{
+				$set: { 'ratings.$.star': star, 'ratings.$.comment': comment },
+			},
+			{ new: true },
+		);
+	} else {
+		// add start & comment
+		await Product.findByIdAndUpdate(
+			pid,
+			{
+				$push: { ratings: { star, comment, postedBy: _id } },
+			},
+			{ new: true },
+		);
+	}
+	return res.status(200).json({
+		status: true,
+	});
+});
 module.exports = {
 	createProduct,
 	getProduct,
 	getProducts,
 	updateProduct,
 	deleteProduct,
+	ratings,
 };
