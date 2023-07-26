@@ -46,7 +46,19 @@ const getProducts = asyncHandler(async (req, res) => {
 	}
 
 	// Fields limiting
+	if (req.query.fields) {
+		const fields = req.query.fields.split(',').join(' ');
+		queryCommand = queryCommand.select(fields);
+	}
+
 	// Pagination
+	// limit : số object lấy về 1 lần gọi API
+	// skip:2
+	// 1 2 3 ... 10
+	const page = +req.query.page || 1;
+	const limit = +req.query.limit || process.env.LIMIT_PRODUCTS;
+	const skip = (page - 1) * limit;
+	queryCommand.skip(skip).limit(limit);
 
 	// Execute query
 	// Số lượng sp thoả mãn điều kiện !== số lượng sp trả về 1 lần gọi API
@@ -56,8 +68,8 @@ const getProducts = asyncHandler(async (req, res) => {
 			const counts = await Product.find(formatedQueries).countDocuments();
 			return res.status(200).json({
 				success: response ? true : false,
-				products: response ? response : 'Cannot get products',
 				counts,
+				products: response ? response : 'Cannot get products',
 			});
 		})
 		.catch((err) => {
