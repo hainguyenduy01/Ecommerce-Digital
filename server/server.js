@@ -6,6 +6,11 @@ const cookieParser = require('cookie-parser');
 const app = express();
 const port = process.env.PORT || 8888;
 app.use(cookieParser());
+const cors=require('cors');
+app.use(cors({
+	origin:process.env.CLIENT_URL,
+	methods:['GET','POST','PUT','DELETE'],
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 dbConnect();
