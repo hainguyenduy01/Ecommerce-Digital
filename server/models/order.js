@@ -12,9 +12,13 @@ var orderSchema = new mongoose.Schema({
 	status: {
 		type: String,
 		default: 'Đang xử lý',
-		enum: ['Đang xử lý', 'Đã xác nhận', 'Đã hủy'],
+		enum: ['Đang xử lý', 'Đã thành công', 'Đã hủy'],
 	},
-	paymentIntent: {},
+	total: Number,
+	coupon: {
+		type: mongoose.Types.ObjectId,
+		ref: 'Coupon',
+	},
 	orderBy: {
 		type: mongoose.Types.ObjectId,
 		ref: 'User',
