@@ -58,6 +58,7 @@ const BestSeller = () => {
 					{products?.map((el) => (
 						<Product
 							key={el.id}
+							pid={el.id}
 							productData={el}
 							isNew={activeTab === 1 ? true : false}
 						/>
