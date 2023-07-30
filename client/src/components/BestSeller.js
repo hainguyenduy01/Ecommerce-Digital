@@ -37,6 +37,7 @@ const BestSeller = () => {
 	useEffect(() => {
 		if (activeTab === 1) setProducts(bestSellers);
 		if (activeTab === 2) setProducts(newProducts);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [activeTab]);
 	return (
 		<div>
@@ -44,7 +45,7 @@ const BestSeller = () => {
 				{tabs?.map((el) => (
 					<span
 						key={el.id}
-						className={`font-semibold capitalize px-8 border-r cursor-pointer text-gray-400 ${
+						className={`font-semibold uppercase px-8 border-r cursor-pointer text-gray-400 ${
 							activeTab === el.id ? 'text-gray-900' : ''
 						}`}
 						onClick={() => setActiveTab(el.id)}
