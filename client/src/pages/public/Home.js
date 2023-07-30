@@ -1,5 +1,7 @@
 import React from 'react';
 import { Sidebar, Banner } from '../../components';
+import BestSeller from '../../components/BestSeller';
+
 const Home = () => {
 	return (
 		<div className="w-main flex">
@@ -9,7 +11,7 @@ const Home = () => {
 			</div>
 			<div className="flex flex-col gap-5 pl-5 w-[80%] flex-auto ">
 				<Banner />
-				<span>Best seller</span>
+				<BestSeller />
 			</div>
 		</div>
 	);

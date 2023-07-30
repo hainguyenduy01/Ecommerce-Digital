@@ -5,7 +5,7 @@ export const getCategories = createAsyncThunk(
 	'app/categories',
 	async (data, { rejectWithValue }) => {
 		const response = await apis.apiGetCategories();
-		if (!response.data.success) return rejectWithValue(response.data);
-		return response.data.prodCategories;
+		if (!response.success) return rejectWithValue(response);
+		return response.prodCategories;
 	},
 );
