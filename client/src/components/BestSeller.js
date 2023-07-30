@@ -41,7 +41,7 @@ const BestSeller = () => {
 	return (
 		<div>
 			<div className="flex text-[20px] ml-[-32px]">
-				{tabs.map((el) => (
+				{tabs?.map((el) => (
 					<span
 						key={el.id}
 						className={`font-semibold capitalize px-8 border-r cursor-pointer text-gray-400 ${
