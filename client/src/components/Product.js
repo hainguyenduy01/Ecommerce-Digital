@@ -5,12 +5,16 @@ import trending from '../assets/trending.png';
 import { renderStarFromNumber } from '../utils/helpers';
 import SelectOption from './SelectOption';
 import icons from '../utils/icons';
+import { Link } from 'react-router-dom';
+import path from '../utils/path';
 const { AiFillEye, AiOutlineMenu, BsFillSuitHeartFill } = icons;
+
 const Product = ({ productData, isNew }) => {
 	const [isShowOption, setIsShowOption] = useState(false);
 	return (
 		<div className="w-full text-base px-[10px]">
-			<div
+			<Link
+				to={`/${path.DETAIL_PRODUCT}/${productData?._id}/${productData?.title}}`}
 				className="w-full border p-[15px] flex flex-col items-center"
 				onMouseEnter={(e) => {
 					e.stopPropagation();
@@ -54,7 +58,7 @@ const Product = ({ productData, isNew }) => {
 					<span className="line-clamp-1">{productData?.title}</span>
 					<span>{`${formatMoney(productData?.price)} VNĐ`}</span>
 				</div>
-			</div>
+			</Link>
 		</div>
 	);
 };
